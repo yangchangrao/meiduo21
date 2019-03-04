@@ -14,12 +14,18 @@ from threading import Thread
 class SMS_CODEView(APIView):
     #发送短信
     def get(self,request,mobile):
+        # 判断发送时间
+        conn = get_redis_connection('sms_code')
+        panduan=conn.get('sms_code_panduan_%s'%mobile)
+        if panduan:
+            return Response({'error':'验证码发送频繁'},status=402)
         # 1.获取手机号
         # 2.生成短信验证码
         sms_code= '%06d' % randint(0,999999)
         #3.在redis保存真实的短信验证码
-        conn=get_redis_connection('sms_code')
+
         conn.setex('sms_code_%s'%mobile,300,sms_code)
+        conn.setex('sms_code_panduan_%s'%mobile,30,2)
         #4.发送短信验证
         ccp=CCP()
         ccp.send_template_sms(mobile,[sms_code,'5'],1)
