@@ -23,9 +23,12 @@ class SMS_CODEView(APIView):
         # 2.生成短信验证码
         sms_code= '%06d' % randint(0,999999)
         #3.在redis保存真实的短信验证码
-
-        conn.setex('sms_code_%s'%mobile,300,sms_code)
-        conn.setex('sms_code_panduan_%s'%mobile,30,2)
+           #生成管道对象
+        pl=conn.pipeline()
+        pl.setex('sms_code_%s'%mobile,300,sms_code)
+        pl.setex('sms_code_panduan_%s'%mobile,30,2)
+        #链接redis传递数据
+        pl.execute()
         #4.发送短信验证
         ccp=CCP()
         ccp.send_template_sms(mobile,[sms_code,'5'],1)
