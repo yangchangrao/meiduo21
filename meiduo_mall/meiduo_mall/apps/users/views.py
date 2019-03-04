@@ -10,9 +10,13 @@ from meiduo_mall.libs.yuntongxun.sms import CCP
 from threading import Thread
 
 
-
+# 使用线程执行异步
+def send_sms_code(self, mobile, sms_code):
+    ccp = CCP()
+    ccp.send_template_sms(mobile, [sms_code, '5'], 1)
 class SMS_CODEView(APIView):
     #发送短信
+
     def get(self,request,mobile):
         # 判断发送时间
         conn = get_redis_connection('sms_code')
@@ -30,7 +34,8 @@ class SMS_CODEView(APIView):
         #链接redis传递数据
         pl.execute()
         #4.发送短信验证
-        ccp=CCP()
-        ccp.send_template_sms(mobile,[sms_code,'5'],1)
+        t=Thread(target=send_sms_code,args=(mobile,sms_code))
+        # ccp=CCP()
+        # ccp.send_template_sms(mobile,[sms_code,'5'],1)
         #返回结果
         return Response({'message':'ok'})
