@@ -8,12 +8,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from meiduo_mall.libs.yuntongxun.sms import CCP
 from threading import Thread
-
+from celery_tasks.sms.tasks import send_sms_code
 
 # 使用线程执行异步
-def send_sms_code(self, mobile, sms_code):
-    ccp = CCP()
-    ccp.send_template_sms(mobile, [sms_code, '5'], 1)
+# def send_sms_code(self, mobile, sms_code):
+#     ccp = CCP()
+#     ccp.send_template_sms(mobile, [sms_code, '5'], 1)
 class SMS_CODEView(APIView):
     #发送短信
 
@@ -34,7 +34,10 @@ class SMS_CODEView(APIView):
         #链接redis传递数据
         pl.execute()
         #4.发送短信验证
-        t=Thread(target=send_sms_code,args=(mobile,sms_code))
+        # t=Thread(target=send_sms_code,args=(mobile,sms_code))
+        # t.start()
+        #celery调用
+        send_sms_code.delay(mobile,sms_code)
         # ccp=CCP()
         # ccp.send_template_sms(mobile,[sms_code,'5'],1)
         #返回结果
