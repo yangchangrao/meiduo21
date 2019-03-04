@@ -9,11 +9,14 @@ from rest_framework.views import APIView
 from meiduo_mall.libs.yuntongxun.sms import CCP
 from threading import Thread
 from celery_tasks.sms.tasks import send_sms_code
-
+from users.models import User
 # 使用线程执行异步
 # def send_sms_code(self, mobile, sms_code):
 #     ccp = CCP()
 #     ccp.send_template_sms(mobile, [sms_code, '5'], 1)
+
+
+
 class SMS_CODEView(APIView):
     #发送短信
 
@@ -42,3 +45,24 @@ class SMS_CODEView(APIView):
         # ccp.send_template_sms(mobile,[sms_code,'5'],1)
         #返回结果
         return Response({'message':'ok'})
+class UsernameView(APIView):
+    # 判断用户名是否重复
+    def get(self,request,username):
+        # 1.获取用户名
+        # 2.根据用户名查询用户对象数量
+        count=User.objects.filter(username=username).count()
+        # 3.返回数量
+        return Response({
+            'username':username,
+            'count':count
+        })
+class MobileCountView(APIView):
+    """
+    手机号数量
+    """
+    def get(self,request,mobile):
+        count=User.objects.filter(mobile=mobile).count()
+        return Response({
+            'count':count,
+            'mobile':mobile
+        })
