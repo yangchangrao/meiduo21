@@ -1,15 +1,15 @@
 from random import randint
-
 from django.shortcuts import render
-
 # Create your views here.
 from django_redis import get_redis_connection
+from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from meiduo_mall.libs.yuntongxun.sms import CCP
 from threading import Thread
 from celery_tasks.sms.tasks import send_sms_code
 from users.models import User
+from users.serializers import UserSerializer
 # 使用线程执行异步
 # def send_sms_code(self, mobile, sms_code):
 #     ccp = CCP()
@@ -45,6 +45,7 @@ class SMS_CODEView(APIView):
         # ccp.send_template_sms(mobile,[sms_code,'5'],1)
         #返回结果
         return Response({'message':'ok'})
+
 class UsernameView(APIView):
     # 判断用户名是否重复
     def get(self,request,username):
@@ -56,6 +57,7 @@ class UsernameView(APIView):
             'username':username,
             'count':count
         })
+
 class MobileCountView(APIView):
     """
     手机号数量
@@ -66,3 +68,7 @@ class MobileCountView(APIView):
             'count':count,
             'mobile':mobile
         })
+
+class UserView(CreateAPIView):
+    """用户注册"""
+    serializer_class = UserSerializer
