@@ -1,24 +1,34 @@
 class Broker(object):
-    broker_list=[]
+    # 任务队列
+    broker_list = []
+
 
 class Worker(object):
-    def __init__(self):
-        self.broker=Broker()
-    def run(self,broker,func):
+    # 任务执行者
+
+    def run(self, broker, func):
         if func in broker.broker_list:
-             func()
+            func()
         else:
             return 'error'
+
+
 class Celery(object):
     def __init__(self):
-        self.broker =  Broker()
+        self.broker = Broker()
         self.worker = Worker()
-    def add(self,func):
+
+    def add(self, func):
         self.broker.broker_list.append(func)
-    def work(self,func):
+
+    def work(self, func):
         self.worker.run(self.broker,func)
+
+
 def send_sms_code():
     print('send_sms_code')
+
 app=Celery()
 app.add(send_sms_code)
+
 app.work(send_sms_code)

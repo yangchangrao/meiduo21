@@ -1,5 +1,7 @@
+from django_redis import get_redis_connection
 from rest_framework import serializers
 from users.models import User
+from rest_framework_jwt.settings import api_settings
 import re
 
 class UserSerializer(serializers.ModelSerializer):
@@ -7,6 +9,9 @@ class UserSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(max_length=20,min_length=8,write_only=True)
     sms_code = serializers.CharField(max_length=6,min_length=6,write_only=True)
     allow = serializers.CharField(write_only=True)
+
+    token = serializers.CharField(read_only=True)
+
     class Meta:
         model = User
         fields = ('id','username','mobile','password','password2','sms_code','allow')
@@ -17,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
             },
         'password':{
             'max_length': 20,
-            'min_length': 6,
+            'min_length': 8,
             'write_only':True
             },
         }
@@ -29,6 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
         return value
     #验证协议状态
     def validate_allow(self, value):
+
         if value != 'true':
             raise serializers.ValidationError("协议未同意")
         return value
@@ -58,5 +64,14 @@ class UserSerializer(serializers.ModelSerializer):
 
         # user=User.objects.create(**validated_data)  # 不会加密密码
         user = User.objects.create_user(**validated_data)  # 加密密码
+        # 生成token
+        jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+        jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+
+        payload = jwt_payload_handler(user)
+        token = jwt_encode_handler(payload)
+
+        # user添加token
+        user.token = token
 
         return user

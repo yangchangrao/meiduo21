@@ -5,7 +5,7 @@ from django_redis import get_redis_connection
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from meiduo_mall.libs.yuntongxun.sms import CCP
+#from meiduo_mall.libs.yuntongxun.sms import CCP
 from threading import Thread
 from celery_tasks.sms.tasks import send_sms_code
 from users.models import User
@@ -23,26 +23,27 @@ class SMS_CODEView(APIView):
     def get(self,request,mobile):
         # 判断发送时间
         conn = get_redis_connection('sms_code')
-        panduan=conn.get('sms_code_panduan_%s'%mobile)
-        if panduan:
+        flag=conn.get('sms_code_flag_%s'%mobile)
+        if flag:
             return Response({'error':'验证码发送频繁'},status=402)
         # 1.获取手机号
         # 2.生成短信验证码
         sms_code= '%06d' % randint(0,999999)
+        print(sms_code)
         #3.在redis保存真实的短信验证码
            #生成管道对象
-        pl=conn.pipeline()
-        pl.setex('sms_code_%s'%mobile,300,sms_code)
-        pl.setex('sms_code_panduan_%s'%mobile,30,2)
+        pl = conn.pipeline()
+        pl.setex('sms_code_%s'%mobile, 300 , sms_code)
+        pl.setex('sms_code_panduan_%s' % mobile ,60 , 2)
         #链接redis传递数据
         pl.execute()
         #4.发送短信验证
+        # ccp=CCP()
+        # ccp.send_template_sms(mobile,[sms_code,'5'],1)
         # t=Thread(target=send_sms_code,args=(mobile,sms_code))
         # t.start()
         #celery调用
-        send_sms_code.delay(mobile,sms_code)
-        # ccp=CCP()
-        # ccp.send_template_sms(mobile,[sms_code,'5'],1)
+        send_sms_code.delay(mobile , sms_code)
         #返回结果
         return Response({'message':'ok'})
 
@@ -54,7 +55,7 @@ class UsernameView(APIView):
         count=User.objects.filter(username=username).count()
         # 3.返回数量
         return Response({
-            'username':username,
+            # 'username':username,
             'count':count
         })
 
@@ -66,7 +67,7 @@ class MobileCountView(APIView):
         count=User.objects.filter(mobile=mobile).count()
         return Response({
             'count':count,
-            'mobile':mobile
+            # 'mobile':mobile
         })
 
 class UserView(CreateAPIView):

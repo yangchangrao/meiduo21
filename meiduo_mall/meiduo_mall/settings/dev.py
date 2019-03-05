@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+import datetime
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -211,3 +212,16 @@ CORS_ORIGIN_WHITELIST = (
 CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
 
 AUTH_USER_MODEL= 'users.User'
+
+JWT_AUTH = {
+
+    'JWT_RESPONSE_PAYLOAD_HANDLER':
+    'users.utils.jwt_response_payload_handler',
+
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
+
+}
+
+AUTHENTICATION_BACKENDS = [
+    'users.utils.UsernameMobileAuthBackend',
+]
