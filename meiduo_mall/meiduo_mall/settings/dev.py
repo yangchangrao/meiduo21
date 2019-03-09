@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'users.apps.UsersConfig',
     'corsheaders',#跨域
+    'areas.apps.AreasConfig'
 ]
 
 MIDDLEWARE = [

@@ -40,6 +40,10 @@ class UserSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
+        #判断手机号和用户名是否一致
+        if re.match(r'1[3-9]\d{9}$',attrs['username']):
+            if attrs['username'] != attrs['mobile']:
+                raise serializers.ValidationError('手机号和用户名不一致')
         # 密码验证
         if attrs['password2'] != attrs['password']:
             raise serializers.ValidationError('密码不一致')
