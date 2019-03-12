@@ -15,8 +15,6 @@ from users.serializers import UserSerializer
 #     ccp = CCP()
 #     ccp.send_template_sms(mobile, [sms_code, '5'], 1)
 
-
-
 class SMS_CODEView(APIView):
     #发送短信
 

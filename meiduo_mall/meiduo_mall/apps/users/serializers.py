@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id','username','mobile','password','password2','sms_code','allow')
+        fields = ('id','username','mobile','password','password2','sms_code','allow','token')
         extra_kwargs = {
             'username':{
                 'max_length':20,
