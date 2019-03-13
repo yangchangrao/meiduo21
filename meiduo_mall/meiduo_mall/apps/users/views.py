@@ -2,14 +2,17 @@ from random import randint
 from django.shortcuts import render
 # Create your views here.
 from django_redis import get_redis_connection
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView,RetrieveAPIView,UpdateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 #from meiduo_mall.libs.yuntongxun.sms import CCP
 from threading import Thread
 from celery_tasks.sms.tasks import send_sms_code
 from users.models import User
-from users.serializers import UserSerializer
+from users import serializers
+from users.serializers import UserSerializer, UserDetailSerialzier
+
+
 # 使用线程执行异步
 # def send_sms_code(self, mobile, sms_code):
 #     ccp = CCP()
@@ -65,9 +68,23 @@ class MobileCountView(APIView):
         count=User.objects.filter(mobile=mobile).count()
         return Response({
             'count':count,
-            # 'mobile':mobile
+
         })
 
 class UserView(CreateAPIView):
     """用户注册"""
     serializer_class = UserSerializer
+
+class UserDetailView(RetrieveAPIView):
+    '''获取用户信息'''
+    serializer_class = serializers.UserDetailSerialzier
+    #父类的get_object不满足需求，重写方法
+    def get_object(self):
+        return self.request.user
+
+class UserEmailView(UpdateAPIView):
+    #指定返回字段的序列化器
+    serializer_class = UserDetailSerialzier
+    # 父类的get_object不满足需求，重写方法
+    def get_object(self):
+        return self.request.user

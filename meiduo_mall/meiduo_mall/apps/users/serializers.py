@@ -1,8 +1,12 @@
+from celery_tasks.email.tasks import send_email
 from django_redis import get_redis_connection
 from rest_framework import serializers
 from users.models import User
 from rest_framework_jwt.settings import api_settings
 import re
+from django.conf import settings
+from itsdangerous import TimedJSONWebSignatureSerializer as TJS
+
 
 class UserSerializer(serializers.ModelSerializer):
     #显示致命字段
@@ -14,12 +18,14 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
+
         fields = ('id','username','mobile','password','password2','sms_code','allow','token')
+
         extra_kwargs = {
-            'username':{
+            'username' : {
                 'max_length':20,
                 'min_length':5
-            },
+        },
         'password':{
             'max_length': 20,
             'min_length': 8,
@@ -79,3 +85,34 @@ class UserSerializer(serializers.ModelSerializer):
         user.token = token
 
         return user
+
+
+
+class UserDetailSerialzier(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields=('id','username','mobile','email','email_active')
+
+        extra_kwargs = {
+            'username' : {
+                'read_only':True
+            },
+            'mobile' : {
+                'read_only': True
+            },
+            'email_active': {
+                'read_only': True
+            }
+        }
+
+    def update(self, instance,validated_data):
+            # 更新邮箱
+        instance.email = validated_data['email']
+        instance.save()
+            #加密用户信息
+        tjs = TJS(settings.SECRET_KEY, 300)
+        token = tjs.dumps({'user_id': instance.id, 'email': validated_data['email']}).decode()
+        to_email=validated_data['email']
+        #异步发送邮件
+        send_email.delay(validated_data['email'],token)
+        return instance

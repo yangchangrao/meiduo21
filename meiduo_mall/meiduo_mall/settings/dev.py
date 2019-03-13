@@ -238,3 +238,14 @@ AUTHENTICATION_BACKENDS = [
 QQ_CLIENT_ID = '101474184'
 QQ_CLIENT_SECRET = 'c6ce949e04e12ecc909ae6a8b09b637c'
 QQ_REDIRECT_URI = 'http://www.meiduo.site:8080/oauth_callback.html'
+
+#qq邮箱
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.qq.com'
+EMAIL_PORT = 25
+#发送邮件的邮箱
+EMAIL_HOST_USER = '1257400631@qq.com'
+#在邮箱中设置的客户端授权密码
+EMAIL_HOST_PASSWORD = 'jwqcwkklzkvbggeg'
+#收件人看到的发件人
+EMAIL_FROM = '美多商城<meiduo@qq.com>'
