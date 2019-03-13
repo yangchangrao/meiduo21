@@ -249,3 +249,10 @@ EMAIL_HOST_USER = '1257400631@qq.com'
 EMAIL_HOST_PASSWORD = 'jwqcwkklzkvbggeg'
 #收件人看到的发件人
 EMAIL_FROM = '美多商城<meiduo@qq.com>'
+
+REST_FRAMEWORK_EXTENSIONS = {
+    # 缓存时间
+    'DEFAULT_CACHE_RESPONSE_TIMEOUT': 60 * 60,
+    # 缓存存储
+    'DEFAULT_USE_CACHE': 'default',
+}
